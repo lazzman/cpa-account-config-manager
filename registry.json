@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "plugins": [
+    {
+      "id": "cpa-account-config-manager",
+      "name": "CPA Account Config Manager",
+      "description": "Manages CLIProxyAPI account configurations with redacted account inspection, multi-format import and export, usage visibility, safe batch edits, sticky proxy URL templates, persistent defaults, and in-plugin account CRUD.",
+      "author": "lazzman",
+      "version": "0.3.1333",
+      "repository": "https://github.com/lazzman/cpa-account-config-manager",
+      "homepage": "https://github.com/lazzman/cpa-account-config-manager",
+      "license": "MIT",
+      "tags": [
+        "Management",
+        "Accounts",
+        "Import",
+        "Export",
+        "Codex",
+        "Proxy"
+      ]
+    }
+  ]
+}

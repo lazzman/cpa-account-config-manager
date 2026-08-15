@@ -55,7 +55,33 @@
 
 ## 安装
 
-推荐从 CPA 插件商店安装，由 CPA 选择对应平台压缩包、校验 Checksum，并明确报告是否需要重启宿主。GitHub Release 也提供以下平台的手动安装包：
+### 从本仓库插件商店源安装
+
+本仓库根目录提供 CPA 可识别的商店注册表：
+
+`https://raw.githubusercontent.com/lazzman/cpa-account-config-manager/main/registry.json`
+
+在 CPA 的 `config.yaml` 中追加自定义商店源并启用插件：
+
+```yaml
+plugins:
+  enabled: true
+  dir: plugins
+  store-sources:
+    - "https://raw.githubusercontent.com/lazzman/cpa-account-config-manager/main/registry.json"
+  configs:
+    cpa-account-config-manager:
+      enabled: true
+      priority: 20
+```
+
+然后打开 Management Center 的插件商店，选择本源中的 `cpa-account-config-manager` 安装或更新。CPA 会按当前平台从本仓库 GitHub Release 下载压缩包并校验 checksum。
+
+如果本机已经从官方源安装过同 ID 插件，请先卸载旧版本，再从本源重装，避免商店源冲突。
+
+### 手动安装
+
+也可以直接使用 GitHub Release 的平台压缩包。CPA 会选择对应平台压缩包、校验 Checksum，并明确报告是否需要重启宿主。可用平台：
 
 | 平台 | 架构 | 动态库 |
 | --- | --- | --- |

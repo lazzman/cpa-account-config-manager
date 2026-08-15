@@ -113,9 +113,36 @@ conditions, then apply independent low-count and low-availability thresholds.
 
 ## Installation
 
-Installing from the CPA Plugin Store is recommended because CPA selects the
-platform archive, verifies checksums, and reports whether a host restart is
-required. Manual release archives are also available for:
+### Install from this repository's plugin-store source
+
+This repository ships a CPA-compatible store registry at:
+
+`https://raw.githubusercontent.com/lazzman/cpa-account-config-manager/main/registry.json`
+
+Add it as a custom store source in CPA `config.yaml` and enable the plugin:
+
+```yaml
+plugins:
+  enabled: true
+  dir: plugins
+  store-sources:
+    - "https://raw.githubusercontent.com/lazzman/cpa-account-config-manager/main/registry.json"
+  configs:
+    cpa-account-config-manager:
+      enabled: true
+      priority: 20
+```
+
+Then open the Plugin Store in the Management Center and install or update
+`cpa-account-config-manager` from this source. CPA downloads the matching
+platform archive from this repository's GitHub Releases and verifies checksums.
+
+If the same plugin ID is already installed from the official source, uninstall
+it first, then reinstall from this source to avoid a store-source conflict.
+
+### Manual installation
+
+Manual release archives are also available for:
 
 | Platform | Architecture | Library |
 | --- | --- | --- |

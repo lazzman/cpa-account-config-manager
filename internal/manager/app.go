@@ -20,7 +20,7 @@ import (
 const (
 	PluginID                = "cpa-account-config-manager"
 	PluginName              = "CPA Account Config Manager"
-	DefaultPluginRepository = "https://github.com/Mxucc/cpa-account-config-manager"
+	DefaultPluginRepository = "https://github.com/lazzman/cpa-account-config-manager"
 
 	managementRoutePrefix = "/plugins/" + PluginID
 	resourceRoutePrefix   = "/v0/resource/plugins/" + PluginID
