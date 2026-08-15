@@ -219,7 +219,7 @@ func TestJobEngineConvertsWorkerPanicToSanitizedFailure(t *testing.T) {
 	account := Account{ID: "a", Name: "a.json", path: "/auths/a.json", revision: revisionFor([]byte(`{"type":"codex"}`))}
 	note := "value"
 	result := NewJobEngine(NewAccountService(host)).applyAccountSafely(
-		context.Background(), account, BatchOperationPatch, BatchPatch{Note: &note}, panicWriter{},
+		context.Background(), account, BatchOperationPatch, BatchPatch{Note: &note}, 0, panicWriter{},
 	)
 	if result.Status != ResultFailed || result.Error != "unexpected worker failure" || !result.Retryable {
 		t.Fatalf("result = %#v", result)
@@ -326,6 +326,71 @@ func twoEditableAccountsHost() *fakeAuthHost {
 		},
 	}
 }
+
+func TestJobEngineExpandsStickyProxyURLTemplatePerAccount(t *testing.T) {
+	host := twoEditableAccountsHost()
+	host.entries[0].Email = "alice@example.com"
+	host.entries[1].Email = "bob@example.com"
+	accounts := NewAccountService(host)
+	previews := NewPreviewService(accounts)
+	template := "http://user-{email_local}-{session}:proxy-secret@127.0.0.1:7890"
+	preview, errPreview := previews.BuildTransient(context.Background(), TargetScope{Mode: "selected", IDs: []string{"a", "b"}}, BatchPatch{ProxyURL: &template})
+	if errPreview != nil {
+		t.Fatalf("BuildTransient() error = %v", errPreview)
+	}
+	if !preview.Public.Patch.ProxyTemplate {
+		t.Fatalf("expected proxy template summary, got %#v", preview.Public.Patch)
+	}
+	writer := &proxyCaptureWriter{}
+	engine := NewJobEngine(accounts)
+	engine.newWriter = func(string, string, HTTPDoer) (ManagementWriter, error) { return writer, nil }
+	engine.Configure(Config{Workers: 1, DataDir: t.TempDir(), ManagementBaseURL: "http://127.0.0.1"})
+	defer engine.Shutdown()
+	if _, errStart := engine.Start(preview, "management-secret", ""); errStart != nil {
+		t.Fatalf("Start() error = %v", errStart)
+	}
+	job := waitForTerminalJob(t, engine)
+	if job.State != JobStateCompleted || job.Succeeded != 2 {
+		t.Fatalf("job = %#v", job)
+	}
+	writer.mu.Lock()
+	defer writer.mu.Unlock()
+	if len(writer.proxyURLs) != 2 {
+		t.Fatalf("proxy patches = %#v", writer.proxyURLs)
+	}
+	aURL := writer.proxyURLs["a.json"]
+	bURL := writer.proxyURLs["b.json"]
+	if aURL == "" || bURL == "" || aURL == bURL {
+		t.Fatalf("proxy URLs = %#v", writer.proxyURLs)
+	}
+	if !strings.Contains(aURL, "user-alice-") || !strings.Contains(bURL, "user-bob-") {
+		t.Fatalf("proxy URLs missing sticky usernames: %#v", writer.proxyURLs)
+	}
+	if strings.Contains(aURL, "{") || strings.Contains(bURL, "{") {
+		t.Fatalf("template placeholders were not expanded: %#v", writer.proxyURLs)
+	}
+}
+
+type proxyCaptureWriter struct {
+	mu        sync.Mutex
+	proxyURLs map[string]string
+}
+
+func (w *proxyCaptureWriter) PatchFields(_ context.Context, name string, patch BatchPatch) error {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	if patch.ProxyURL != nil {
+		if w.proxyURLs == nil {
+			w.proxyURLs = make(map[string]string)
+		}
+		w.proxyURLs[name] = *patch.ProxyURL
+	}
+	return nil
+}
+
+func (w *proxyCaptureWriter) PatchDisabled(context.Context, string, bool) error { return nil }
+
+func (w *proxyCaptureWriter) DeleteAuthFile(context.Context, string) error { return nil }
 
 type panicWriter struct{}
 

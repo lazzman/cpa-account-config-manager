@@ -273,7 +273,7 @@ func TestJobEngineAppliesPluginConcurrencyOnceAlongsideCPAFields(t *testing.T) {
 	priority := 7
 	result := engine.applyAccount(context.Background(), Account{
 		ID: "index-a", AuthID: "auth-a", Name: "account.json", path: "/auths/account.json", revision: revisionFor(raw),
-	}, BatchOperationPatch, BatchPatch{ConcurrencyLimit: &limit, Priority: &priority}, writer)
+	}, BatchOperationPatch, BatchPatch{ConcurrencyLimit: &limit, Priority: &priority}, 0, writer)
 	if result.Status != ResultSucceeded || len(result.AppliedFields) != 2 || result.AppliedFields[0] != "priority" || result.AppliedFields[1] != "concurrency_limit" {
 		t.Fatalf("applyAccount() = %#v", result)
 	}

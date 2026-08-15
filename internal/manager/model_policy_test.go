@@ -198,7 +198,7 @@ func TestJobAppliesAccountSpecificModelPolicyPayload(t *testing.T) {
 		t.Fatalf("Validate() error = %v", errPatch)
 	}
 	for _, account := range resolved.Accounts {
-		result := engine.applyAccount(context.Background(), account, BatchOperationPatch, patch, writer)
+		result := engine.applyAccount(context.Background(), account, BatchOperationPatch, patch, 0, writer)
 		if result.Status != ResultSucceeded {
 			t.Fatalf("apply %s = %#v", account.ID, result)
 		}

@@ -80,11 +80,12 @@ type retryIntent struct {
 }
 
 type jobRun struct {
-	jobID     string
-	operation string
-	patch     BatchPatch
-	targets   []Account
-	writer    ManagementWriter
+	jobID       string
+	operation   string
+	patch       BatchPatch
+	targets     []Account
+	targetIndex map[string]int
+	writer      ManagementWriter
 }
 
 type JobEngine struct {
@@ -281,12 +282,18 @@ func (e *JobEngine) Start(preview previewSnapshot, managementKey, parentJobID st
 		e.mu.Unlock()
 		return JobSnapshot{}, ErrJobStorageUnavailable
 	}
+	targets := append([]Account(nil), preview.Targets...)
+	targetIndex := make(map[string]int, len(targets))
+	for index, account := range targets {
+		targetIndex[account.ID] = index
+	}
 	run := jobRun{
-		jobID:     jobID,
-		operation: operation,
-		patch:     cloneBatchPatch(preview.Patch),
-		targets:   append([]Account(nil), preview.Targets...),
-		writer:    writer,
+		jobID:       jobID,
+		operation:   operation,
+		patch:       cloneBatchPatch(preview.Patch),
+		targets:     targets,
+		targetIndex: targetIndex,
+		writer:      writer,
 	}
 	snapshot := cloneJobSnapshot(e.snapshot, true)
 	e.wait.Add(1)
@@ -374,7 +381,7 @@ func (e *JobEngine) run(ctx context.Context, run jobRun, workers int) {
 					continue
 				}
 				e.setResultRunning(run.jobID, account.ID)
-				result := e.applyAccountSafely(ctx, account, run.operation, run.patch, run.writer)
+				result := e.applyAccountSafely(ctx, account, run.operation, run.patch, run.targetIndex[account.ID], run.writer)
 				e.completeResult(run.jobID, account.ID, result)
 			}
 		}()
@@ -393,7 +400,7 @@ func clearManagementWriterSecrets(writer ManagementWriter) {
 	}
 }
 
-func (e *JobEngine) applyAccountSafely(ctx context.Context, account Account, operation string, patch BatchPatch, writer ManagementWriter) (result JobResult) {
+func (e *JobEngine) applyAccountSafely(ctx context.Context, account Account, operation string, patch BatchPatch, targetIndex int, writer ManagementWriter) (result JobResult) {
 	defer func() {
 		if recover() != nil {
 			result = JobResult{
@@ -403,10 +410,10 @@ func (e *JobEngine) applyAccountSafely(ctx context.Context, account Account, ope
 			}
 		}
 	}()
-	return e.applyAccount(ctx, account, operation, patch, writer)
+	return e.applyAccount(ctx, account, operation, patch, targetIndex, writer)
 }
 
-func (e *JobEngine) applyAccount(ctx context.Context, account Account, operation string, patch BatchPatch, writer ManagementWriter) JobResult {
+func (e *JobEngine) applyAccount(ctx context.Context, account Account, operation string, patch BatchPatch, targetIndex int, writer ManagementWriter) JobResult {
 	if ctx.Err() != nil {
 		return JobResult{Status: ResultInterrupted, Error: "job was interrupted before this target was updated", Retryable: true}
 	}
@@ -428,6 +435,13 @@ func (e *JobEngine) applyAccount(ctx context.Context, account Account, operation
 	}
 
 	resolvedPatch := cloneBatchPatch(patch)
+	if patch.ProxyURL != nil && proxyURLUsesTemplate(*patch.ProxyURL) {
+		expanded, errExpand := expandProxyURLForAccount(*patch.ProxyURL, account, targetIndex)
+		if errExpand != nil {
+			return JobResult{Status: ResultFailed, Error: "proxy_url template could not be expanded for this account", Retryable: true}
+		}
+		resolvedPatch.ProxyURL = stringPointer(expanded)
+	}
 	if patch.ModelPolicy != nil {
 		var catalog []AccountModelOption
 		if patch.ModelPolicy.Mode != ModelPolicyModeAll {

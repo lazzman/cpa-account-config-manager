@@ -448,6 +448,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .edit-row.is-enabled { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); background: color-mix(in srgb, var(--accent-soft) 55%, var(--surface)); opacity: 1; }
 .concurrency-editor-control { display: grid; grid-template-columns: minmax(90px, 150px) minmax(0, 1fr); align-items: center; gap: 10px; }
 .concurrency-editor-control span { color: var(--muted); font-size: calc(9px * var(--font-size-scale)); line-height: 1.45; }
+.proxy-editor-control { min-width: 0; display: grid; gap: 6px; }
+.proxy-template-help { margin: 0; color: var(--muted); font-size: calc(9px * var(--font-size-scale)); line-height: 1.5; }
 .edit-optin { display: flex; align-items: center; gap: 8px; font-size: calc(12px * var(--font-size-scale)); font-weight: 700; }
 .edit-control { min-width: 0; }
 .edit-control input, .edit-control select { background: var(--surface); }

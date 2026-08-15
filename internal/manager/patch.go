@@ -47,6 +47,7 @@ type PatchSummary struct {
 	HeaderSet     []string `json:"header_set,omitempty"`
 	HeaderRemove  []string `json:"header_remove,omitempty"`
 	ProxyMutation bool     `json:"proxy_mutation"`
+	ProxyTemplate bool     `json:"proxy_template"`
 }
 
 func (scope TargetScope) Validate() (TargetScope, error) {
@@ -102,7 +103,7 @@ func (patch BatchPatch) Validate() (BatchPatch, error) {
 	}
 	if patch.ProxyURL != nil {
 		value := strings.TrimSpace(*patch.ProxyURL)
-		if errValidate := validateProxyURL(value); errValidate != nil {
+		if errValidate := validateProxyURLTemplate(value); errValidate != nil {
 			return BatchPatch{}, errValidate
 		}
 		patch.ProxyURL = stringPointer(value)
@@ -165,7 +166,11 @@ func (patch BatchPatch) Summary() PatchSummary {
 	if patch.ConcurrencyLimit != nil {
 		fields = append(fields, "concurrency_limit")
 	}
-	summary := PatchSummary{Fields: fields, ProxyMutation: patch.ProxyURL != nil}
+	summary := PatchSummary{
+		Fields:        fields,
+		ProxyMutation: patch.ProxyURL != nil,
+		ProxyTemplate: patch.ProxyURL != nil && proxyURLUsesTemplate(*patch.ProxyURL),
+	}
 	if patch.Headers != nil {
 		summary.Fields = append(summary.Fields, "headers")
 		for name := range patch.Headers.Set {

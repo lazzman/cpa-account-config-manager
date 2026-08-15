@@ -259,11 +259,14 @@ export function BatchEditor({ title = "ui.batch_edit", scopeLabel, onClose, onSu
           <input value={prefix} onChange={(event) => setPrefix(event.target.value)} maxLength={256} disabled={!enabled.prefix} aria-label={tx("ui.prefix_value")} />
         </EditRow>
         <EditRow checked={enabled.proxy_url} label={tx("ui.proxy_url")} onToggle={() => toggle("proxy_url")}>
-          <div className="secret-input editor-secret">
-            <input value={proxyURL} onChange={(event) => setProxyURL(event.target.value)} type={showProxy ? "text" : "password"} disabled={!enabled.proxy_url} aria-label={tx("ui.proxy_url_value")} />
-            <button type="button" aria-label={tx(showProxy ? "ui.hide_proxy" : "ui.show_proxy")} title={tx(showProxy ? "ui.hide_proxy" : "ui.show_proxy")} onClick={() => setShowProxy((value) => !value)} disabled={!enabled.proxy_url}>
-              {showProxy ? <EyeOff size={16} /> : <Eye size={16} />}
-            </button>
+          <div className="proxy-editor-control">
+            <div className="secret-input editor-secret">
+              <input value={proxyURL} onChange={(event) => setProxyURL(event.target.value)} type={showProxy ? "text" : "password"} disabled={!enabled.proxy_url} placeholder={tx("ui.proxy_url_template_placeholder")} aria-label={tx("ui.proxy_url_value")} />
+              <button type="button" aria-label={tx(showProxy ? "ui.hide_proxy" : "ui.show_proxy")} title={tx(showProxy ? "ui.hide_proxy" : "ui.show_proxy")} onClick={() => setShowProxy((value) => !value)} disabled={!enabled.proxy_url}>
+                {showProxy ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+            <p className="proxy-template-help">{tx("ui.proxy_url_template_help")}</p>
           </div>
         </EditRow>
         <EditRow checked={enabled.websockets} label={tx("ui.websockets")} onToggle={() => toggle("websockets")}>
