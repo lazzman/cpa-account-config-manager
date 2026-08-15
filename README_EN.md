@@ -14,7 +14,9 @@ journal without exposing raw credentials to the browser.
 - List, search, filter, view, add, edit, enable, disable, deduplicate, and
   delete accounts. Page sizes include 20, 50, 100, 200, 500, and 1000.
 - Run selected or filtered batch edits with a server-side preview, revision
-  checks, bounded workers, per-account results, and failed-only retry.
+  checks, bounded workers, per-account results, failed-only retry, and sticky
+  proxy URL templates (`{email_local}`, `{session}`, `{uuid}`, and similar) that
+  expand to a unique proxy username per account.
 - Display CPA request counters, token totals, Codex 5-hour and 7-day quota
   windows, plan type, and active reset count when CPA or the upstream account
   provides that data.

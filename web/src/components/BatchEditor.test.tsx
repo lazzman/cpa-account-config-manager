@@ -20,6 +20,23 @@ describe("BatchEditor", () => {
     expect(submit).toHaveBeenCalledWith({ note: "batch-note" });
   });
 
+  it("submits a sticky proxy URL template", async () => {
+    const user = userEvent.setup();
+    const submit = vi.fn();
+    const proxyURL = "socks5h://{email_local}-{uuid}@127.0.0.1:1080";
+    render(<BatchEditor scopeLabel="已选 2 个账号" loadModels={loadModels} onClose={() => undefined} onSubmit={submit} />);
+
+    await user.click(screen.getByLabelText("代理 URL"));
+    expect(screen.getByText(/粘性代理模板/)).toBeInTheDocument();
+    const proxyInput = screen.getByLabelText("Proxy URL 值");
+    // userEvent.type treats {name} as special keys; paste keeps template placeholders literal.
+    await user.click(proxyInput);
+    await user.paste(proxyURL);
+    await user.click(screen.getByRole("button", { name: "生成预览" }));
+
+    expect(submit).toHaveBeenCalledWith({ proxy_url: proxyURL });
+  });
+
 	it("submits an explicitly enabled account concurrency limit", async () => {
 		const user = userEvent.setup();
 		const submit = vi.fn();

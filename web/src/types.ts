@@ -394,6 +394,7 @@ export interface PatchSummary {
   header_set?: string[];
   header_remove?: string[];
   proxy_mutation: boolean;
+  proxy_template?: boolean;
 }
 
 export interface PreviewTarget {

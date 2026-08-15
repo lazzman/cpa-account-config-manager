@@ -9,7 +9,7 @@
 
 | 功能 | 说明 |
 | --- | --- |
-| 批量账号管理 | 集中完成账号搜索、筛选、查看、添加、编辑、启用、禁用、删除和去重；可对已选账号或全部筛选结果批量修改，支持预览、Revision 冲突检查、有界并发、逐账号结果和仅重试失败项。 |
+| 批量账号管理 | 集中完成账号搜索、筛选、查看、添加、编辑、启用、禁用、删除和去重；可对已选账号或全部筛选结果批量修改，支持预览、Revision 冲突检查、有界并发、逐账号结果和仅重试失败项。批量代理支持粘性模板（如 `{email_local}`、`{session}`、`{uuid}`），可为每个账号展开不同的代理用户名。 |
 | 全格式兼容导入 | 支持粘贴 JSON 文本，以及混合上传 JSON、JSON Lines、TXT 和 ZIP；ZIP 可包含多个文件，单次最多处理 10,000 个账号。可识别 CPA、sub2api、Codex Auth、Agent Identity、PAT、Claude、Gemini，以及 Cockpit、9router、AxonHub、Codex Manager 等常见账号 JSON 结构。 |
 | 全格式输出 | 可导出 CPA、sub2api、Cockpit、9router、Codex、AxonHub 和 Codex Manager；无法用单文件容纳多账号的目标格式会自动打包为 ZIP。批量结果和操作报告可另行导出为 JSON、CSV 或 JSON Lines。 |
 | 配置预设 | 基础策略可为以后导入或新发现的账号设置默认 Priority、WebSockets、模型探测和模型策略；条件策略可按提供方、套餐、账号类型和邮箱后缀进一步覆盖。 |
