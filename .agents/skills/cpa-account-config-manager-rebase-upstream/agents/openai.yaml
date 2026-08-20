@@ -1,0 +1,4 @@
+interface:
+  display_name: "CPA Account Config Manager Upstream Rebase"
+  short_description: "Safely rebase local commits onto Mxucc/cpa-account-config-manager upstream/main"
+  default_prompt: "Use $cpa-account-config-manager-rebase-upstream to safely rebase the current branch onto upstream/main and keep local sticky-proxy/registry changes."
